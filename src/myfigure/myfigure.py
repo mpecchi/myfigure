@@ -16,10 +16,10 @@ import pandas as pd
 lttrs: list[str] = list(string.ascii_lowercase)
 
 # list with colors
-clrs: list[tuple] = sns.color_palette("deep", 30)
+colors: list[tuple] = sns.color_palette("deep", 30)
 
 # list with linestyles for plotting
-lnstls: list[tuple] = [
+linestyles: list[tuple] = [
     (0, ()),  # solid
     (0, (1, 1)),  # 'densely dotted'
     (0, (5, 1)),  # 'densely dashed'
@@ -49,7 +49,7 @@ lnstls: list[tuple] = [
 ]  # 'loosely dashdotdotted'
 
 # list with markers for plotting
-mrkrs: list[str] = [
+markers: list[str] = [
     "o",
     "v",
     "X",
@@ -80,7 +80,7 @@ mrkrs: list[str] = [
     "3",
 ]
 
-htchs: list[str] = [
+hatches: list[str] = [
     None,
     "//",
     "...",
@@ -215,7 +215,7 @@ class MyFigure:
             "legend_ncols": 1,
             "legend_title": None,
             "legend_bbox_xy": None,
-            "annotate_lttrs": None,
+            "annotate_lttrs": False,
             "annotate_lttrs_xy": None,
             "grid": None,
             "color_palette": "deep",
@@ -224,12 +224,12 @@ class MyFigure:
             "sns_style": "ticks",
             "text_font_size": 10,
             "legend_font_size": 10,
-            "x_labelpad": 0,
-            "y_labelpad": 0,
+            "x_labelpad": 1,
+            "y_labelpad": 1,
             "legend_borderpad": 0.3,
             "legend_handlelength": 1.5,
-            "annotate_outliers": None,
-            "masked_unsignificant_data": None,
+            "annotate_outliers": False,
+            "masked_unsignificant_data": False,
         }
         return defaults
 
@@ -305,6 +305,7 @@ class MyFigure:
         save_as_tif: bool = False,
         png_transparency: bool = False,
         dpi: int = 300,
+        update_all_axis_props: bool = True,
     ) -> None:
         """
         Save the figure to a file.
@@ -326,23 +327,18 @@ class MyFigure:
         :param png_transparency: PNG transparency.
         :type png_transparency: bool
         """
-        self.update_axes_single_props()
-
-        self.update_axes_list_props()
-
-        self.annotate_outliers()
-
-        self.apply_hatch_patterns()
-
-        self.add_legend()
-
-        self.rotate_x_labels()
-
-        try:
-            self.fig.align_labels()  # align labels of subplots, needed only for multi plot
-        except AttributeError:
-            print("align_labels not performed")
-        self.annotate_letters()
+        if update_all_axis_props:
+            self.update_axes_single_props()
+            self.update_axes_list_props()
+            self.annotate_outliers()
+            self.apply_hatch_patterns()
+            self.add_legend()
+            self.rotate_x_labels()
+            try:
+                self.fig.align_labels()  # align labels of subplots, needed only for multi plot
+            except AttributeError:
+                print("align_labels not performed")
+            self.annotate_letters()
         # Saving the figure
         formats = {
             "png": save_as_png,
@@ -434,7 +430,7 @@ class MyFigure:
         Annotate the subplots with letters.
         """
         if (
-            self.kwargs["annotate_lttrs_xy"] is not None
+            self.kwargs["annotate_lttrs_xy"]
             and isinstance(self.kwargs["annotate_lttrs_xy"], (list, tuple))
             and len(self.kwargs["annotate_lttrs_xy"]) >= 2
         ):
@@ -444,7 +440,7 @@ class MyFigure:
         else:
             x_lttrs = -0.15
             y_lttrs = -0.15
-        if self.kwargs["annotate_lttrs"] is not None:
+        if self.kwargs["annotate_lttrs"]:
             if isinstance(self.kwargs["annotate_lttrs"], str):
                 letters_list = [self.kwargs["annotate_lttrs"]]
             elif isinstance(self.kwargs["annotate_lttrs"], (list, tuple)):
@@ -592,14 +588,15 @@ class MyFigure:
             num_groups = len(ax.get_xticks(minor=False))
             # Determine the number of bars in each group
             bars_in_group = len(bars) // num_groups
-            patterns = htchs[:bars_in_group]  # set hatch patterns in correct order
-            hatches = []  # list for hatches in the order of the bars
+            patterns = hatches[:bars_in_group]  # set hatch patterns in correct order
+            plot_hatches_list = []  # list for hatches in the order of the bars
             for h in patterns:  # loop over patterns to create bar-ordered hatches
                 for _ in range(int(len(bars) / len(patterns))):
-                    hatches.append(h)
+                    plot_hatches_list.append(h)
             # loop over bars and hatches to set hatches in correct order
-            for b, hatch in zip(bars, hatches):
+            for b, hatch in zip(bars, plot_hatches_list):
                 b.set_hatch(hatch)
+                b.set_edgecolor("k")
 
     def _broadcast_value_prop(self, prop: list | str | float | int | bool, prop_name: str) -> list:
         """
@@ -613,16 +610,17 @@ class MyFigure:
         :rtype: list
         """
         if prop is None:
-            return [None] * self.n_axs
+            prop = [None] * self.n_axs
+            return prop
         if isinstance(prop, (list, tuple)):
             if len(prop) == self.n_axs:
                 return prop
-            else:
-                raise ValueError(
-                    f"The size of the property '{prop_name}' does not match the number of axes."
-                )
+            raise ValueError(
+                f"The size of the property '{prop_name}' does not match the number of axes."
+            )
         if isinstance(prop, (str, float, int, bool)):
-            return [prop] * self.n_axs
+            prop = [prop] * self.n_axs
+            return prop
 
     def _broadcast_list_prop(self, prop: list | None, prop_name: str):
         """_summary_
@@ -640,9 +638,6 @@ class MyFigure:
 
         # Check if prop is a list of lists and has the correct length
         if all(isinstance(item, (list, tuple)) for item in prop) and len(prop) == self.n_axs:
-            # Ensure all inner lists have the same size
-            if not all(len(item) == len(prop[0]) for item in prop):
-                raise ValueError(f"All inner lists in '{prop_name}' must have the same size.")
             return prop
         elif isinstance(prop, (list, tuple)) and all(
             isinstance(item, (int, float, str)) for item in prop
@@ -695,115 +690,81 @@ class MyFigure:
                     break
 
                 # Set dx and dy for text positioning adjustments
-            df_ave, df_std = extract_ave_std_from_ax(ax)
-            y_lim = ax.get_ylim()
-            dx = 0.15 * len(df_ave.index)
-            dy = 0.04
-            tform = blended_transform_factory(ax.transData, ax.transAxes)
-            dfao = pd.DataFrame(columns=["H/L", "xpos", "ypos", "ave", "std", "text"])
-            dfao["ave"] = df_ave.transpose().to_numpy().flatten().tolist()
-            if df_std.empty:
-                df_std = np.zeros(len(dfao["ave"]))
-            else:
-                dfao["std"] = df_std.transpose().to_numpy().flatten().tolist()
-            try:
-                dfao["xpos"] = [p.get_x() + p.get_width() / 2 for p in ax.patches]
-            except ValueError:  # otherwise the masking adds twice the columns
-                dfao["xpos"] = [
-                    p.get_x() + p.get_width() / 2 for p in ax.patches[: len(ax.patches) // 2]
-                ]
-            cond = (dfao["ave"] < y_lim[0]) | (dfao["ave"] > y_lim[1])
-            dfao = dfao.drop(dfao[~cond].index)
-            for ao in dfao.index.tolist():  # loop through bars
-                if dfao.loc[ao, "ave"] == float("inf"):
-                    dfao.loc[ao, "text"] = "inf"
-                    dfao.loc[ao, "H/L"] = "H"
-                elif dfao.loc[ao, "ave"] == float("-inf"):
-                    dfao.loc[ao, "text"] = "-inf"
-                    dfao.loc[ao, "H/L"] = "L"
-                elif dfao.loc[ao, "ave"] > y_lim[1]:
-                    dfao.loc[ao, "H/L"] = "H"
-                    dfao.loc[ao, "text"] = "{:.2f}".format(round(dfao.loc[ao, "ave"], 2)).strip()
-                    if (dfao.loc[ao, "std"] != 0) & (~np.isnan(dfao.loc[ao, "std"])):
-                        dfao.loc[ao, "text"] += r"$\pm$" + "{:.2f}".format(
-                            round(dfao.loc[ao, "std"], 2)
-                        )
-                elif dfao.loc[ao, "ave"] < y_lim[0]:
-                    dfao.loc[ao, "H/L"] = "L"
-                    dfao.loc[ao, "text"] = str(round(dfao.loc[ao, "ave"], 2)).strip()
-                    if dfao.loc[ao, "std"] != 0:
-                        dfao.loc[ao, "text"] += r"$\pm$" + "{:.2f}".format(
-                            round(dfao.loc[ao, "std"], 2)
-                        )
+                df_ave, df_std = extract_ave_std_from_ax(ax)
+                y_lim = ax.get_ylim()
+                dx = 0.15 * len(df_ave.index)
+                dy = 0.04
+                tform = blended_transform_factory(ax.transData, ax.transAxes)
+                dfao = pd.DataFrame(columns=["H/L", "xpos", "ypos", "ave", "std", "text"])
+                dfao["ave"] = df_ave.transpose().to_numpy().flatten().tolist()
+                if df_std.empty:
+                    df_std = np.zeros(len(dfao["ave"]))
                 else:
-                    print("Something is wrong", dfao.loc[ao, "ave"])
-            for hl, ypos, dy in zip(["L", "H"], [0.02, 0.98], [0.04, -0.04]):
-                dfao1 = dfao[dfao["H/L"] == hl]
-                dfao1["ypos"] = ypos
-                if not dfao1.empty:
-                    dfao1 = dfao1.sort_values("xpos", ascending=True)
-                    dfao1["diffx"] = (
-                        np.diff(dfao1["xpos"].values, prepend=dfao1["xpos"].values[0]) < dx
-                    )
-                    dfao1.reset_index(inplace=True)
-
-                    for i in dfao1.index.tolist()[1:]:
-                        dfao1.loc[i, "ypos"] = ypos
-                        for e in range(i, 0, -1):
-                            if dfao1.loc[e, "diffx"]:
-                                dfao1.loc[e, "ypos"] += dy
-                            else:
-                                break
-                    for ao in dfao1.index.tolist():
-                        ax.annotate(
-                            dfao1.loc[ao, "text"],
-                            xy=(dfao1.loc[ao, "xpos"], 0),
-                            xycoords=tform,
-                            textcoords=tform,
-                            xytext=(dfao1.loc[ao, "xpos"], dfao1.loc[ao, "ypos"]),
-                            fontsize=9,
-                            ha="center",
-                            va="center",
-                            bbox={
-                                "boxstyle": "square,pad=0",
-                                "edgecolor": None,
-                                "facecolor": "white",
-                                "alpha": 0.7,
-                            },
+                    dfao["std"] = df_std.transpose().to_numpy().flatten().tolist()
+                try:
+                    dfao["xpos"] = [p.get_x() + p.get_width() / 2 for p in ax.patches]
+                except ValueError:  # otherwise the masking adds twice the columns
+                    dfao["xpos"] = [
+                        p.get_x() + p.get_width() / 2 for p in ax.patches[: len(ax.patches) // 2]
+                    ]
+                cond = (dfao["ave"] < y_lim[0]) | (dfao["ave"] > y_lim[1])
+                dfao = dfao.drop(dfao[~cond].index)
+                for ao in dfao.index.tolist():  # loop through bars
+                    if dfao.loc[ao, "ave"] == float("inf"):
+                        dfao.loc[ao, "text"] = "inf"
+                        dfao.loc[ao, "H/L"] = "H"
+                    elif dfao.loc[ao, "ave"] == float("-inf"):
+                        dfao.loc[ao, "text"] = "-inf"
+                        dfao.loc[ao, "H/L"] = "L"
+                    elif dfao.loc[ao, "ave"] > y_lim[1]:
+                        dfao.loc[ao, "H/L"] = "H"
+                        dfao.loc[ao, "text"] = "{:.2f}".format(
+                            round(dfao.loc[ao, "ave"], 2)
+                        ).strip()
+                        if (dfao.loc[ao, "std"] != 0) & (~np.isnan(dfao.loc[ao, "std"])):
+                            dfao.loc[ao, "text"] += r"$\pm$" + "{:.2f}".format(
+                                round(dfao.loc[ao, "std"], 2)
+                            )
+                    elif dfao.loc[ao, "ave"] < y_lim[0]:
+                        dfao.loc[ao, "H/L"] = "L"
+                        dfao.loc[ao, "text"] = str(round(dfao.loc[ao, "ave"], 2)).strip()
+                        if dfao.loc[ao, "std"] != 0:
+                            dfao.loc[ao, "text"] += r"$\pm$" + "{:.2f}".format(
+                                round(dfao.loc[ao, "std"], 2)
+                            )
+                    else:
+                        print("Something is wrong", dfao.loc[ao, "ave"])
+                for hl, ypos, dy in zip(["L", "H"], [0.02, 0.98], [0.04, -0.04]):
+                    dfao1 = dfao[dfao["H/L"] == hl]
+                    dfao1["ypos"] = ypos
+                    if not dfao1.empty:
+                        dfao1 = dfao1.sort_values("xpos", ascending=True)
+                        dfao1["diffx"] = (
+                            np.diff(dfao1["xpos"].values, prepend=dfao1["xpos"].values[0]) < dx
                         )
+                        dfao1.reset_index(inplace=True)
 
-
-if __name__ == "__main__":
-    f = MyFigure(
-        filename="my_plot",
-        out_path=plib.Path(r"C:\Users\mp933\Desktop\New folder"),
-        rows=1,
-        cols=1,
-        width=6,
-        #     height=12,
-        twinx=True,
-        #     x_lab=["aaa", "qqq", "aa", "qq"],
-        #     y_lab="bbb",
-        #     yt_lab="ccc",
-        #     x_lim=[0, 1],
-        y_lim=[0, 1],
-        #     yt_lim=[[0, 1], [0, 0.5], [0, 1], [0, 0.5]],
-        #     x_ticks=[[0, 0.5, 1], [0, 0.5, 2], [0, 1], [0, 0.5]],
-        #     # x_ticklabels=["a", "c", "d"],
-        #     grid=True,
-        #     annotate_lttrs=["a", "b", "a", "b"],
-        #     annotate_lttrs_xy=[-0.11, -0.15],
-        #     x_ticklabels_rotation=0,
-        annotate_outliers=True,
-    )
-    f.axs[0].bar(["A", "B", "C"], [10, 20, 30], yerr=[1, 2, 3])
-    # f.axs[0].plot([0, 1], [0, 3], label="a")
-    # f.axts[0].plot([0, 2], [0, 4], label="b")
-    # f.axts[0].plot([0, 2], [0, 5], label="ccc")
-    # f.axs[1].plot([0, 1], [0, 3], label="aaa")
-
-    # f.annotate_outliers_in_ax()
-
-    # ins = f.create_inset(f.axs[0], [0.6, 0.8], [0.4, 0.6], [0, 0.2], [0, 0.2])
-    # ins.plot([0, 1], [0, 3], label="a")
-    f.save_figure()
+                        for i in dfao1.index.tolist()[1:]:
+                            dfao1.loc[i, "ypos"] = ypos
+                            for e in range(i, 0, -1):
+                                if dfao1.loc[e, "diffx"]:
+                                    dfao1.loc[e, "ypos"] += dy
+                                else:
+                                    break
+                        for ao in dfao1.index.tolist():
+                            ax.annotate(
+                                dfao1.loc[ao, "text"],
+                                xy=(dfao1.loc[ao, "xpos"], 0),
+                                xycoords=tform,
+                                textcoords=tform,
+                                xytext=(dfao1.loc[ao, "xpos"], dfao1.loc[ao, "ypos"]),
+                                fontsize=9,
+                                ha="center",
+                                va="center",
+                                bbox={
+                                    "boxstyle": "square,pad=0",
+                                    "edgecolor": None,
+                                    "facecolor": "white",
+                                    "alpha": 0.7,
+                                },
+                            )
