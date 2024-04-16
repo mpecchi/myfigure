@@ -139,27 +139,6 @@ class MyFigure:
     :type n_axs: int
     """
 
-    @staticmethod
-    def _adjust_lims(lims: tuple[float] | None, gap=0.05) -> tuple[float] | None:
-        """
-        Adjust axis limits with a specified gap.
-
-        :param lims: Axis limits to adjust.
-        :type lims: tuple[float, float] | None
-        :param gap: Percentage gap to add to the limits.
-        :type gap: float, optional
-        :return: Adjusted axis limits.
-        :rtype: tuple[float, float] | None
-        """
-        if lims is None:
-            return None
-        else:
-            new_lims = (
-                lims[0] * (1 + gap) - gap * lims[1],
-                lims[1] * (1 + gap) - gap * lims[0],
-            )
-            return new_lims
-
     def __init__(self, **kwargs: Any) -> None:
         """
         Initialize a MyFigure object with optional configuration.
@@ -325,9 +304,9 @@ class MyFigure:
             if self.broad_props["grid"][i] is not None:
                 ax.grid(self.broad_props["grid"][i])
             if self.broad_props["x_lim"][i] is not None:
-                ax.set_xlim(MyFigure._adjust_lims(self.broad_props["x_lim"][i]))
+                ax.set_xlim(_adjust_lims(self.broad_props["x_lim"][i]))
             if self.broad_props["y_lim"][i] is not None:
-                ax.set_ylim(MyFigure._adjust_lims(self.broad_props["y_lim"][i]))
+                ax.set_ylim(_adjust_lims(self.broad_props["y_lim"][i]))
             if self.broad_props["x_ticks"][i] is not None:
                 ax.set_xticks(self.broad_props["x_ticks"][i])
             if self.broad_props["y_ticks"][i] is not None:
@@ -342,7 +321,7 @@ class MyFigure:
                 if self.broad_props["yt_lab"][i] is not None:
                     axt.set_ylabel(self.broad_props["yt_lab"][i])
                 if self.broad_props["yt_lim"][i] is not None:
-                    axt.set_ylim(MyFigure._adjust_lims(self.broad_props["yt_lim"][i]))
+                    axt.set_ylim(_adjust_lims(self.broad_props["yt_lim"][i]))
                 if self.broad_props["yt_ticks"][i] is not None:
                     axt.set_yticks(self.broad_props["yt_ticks"][i])
                 if self.broad_props["yt_ticklabels"][i] is not None:
@@ -486,38 +465,59 @@ class MyFigure:
                     bbox_inches="tight" if tight_layout else None,
                 )
 
-    def create_inset(
-        self,
-        ax: Axes,
-        ins_x_loc: tuple[float],
-        ins_y_loc: tuple[float],
-        ins_x_lim: tuple[float] | None = None,
-        ins_y_lim: tuple[float] | None = None,
-    ) -> Axes:
-        """
-        Create an inset plot within an existing axis.
 
-        :param ax: The parent axis.
-        :type ax: Axes
-        :param ins_x_loc: X location for the inset.
-        :type ins_x_loc: tuple[float, float]
-        :param ins_y_loc: Y location for the inset.
-        :type ins_y_loc: tuple[float, float]
-        :param ins_x_lim: X limits for the inset.
-        :type ins_x_lim: tuple[float, float] | None
-        :param ins_y_lim: Y limits for the inset.
-        :type ins_y_lim: tuple[float, float] | None
-        :return: The inset axes.
-        :rtype: Axes
-        """
-        wdt = ins_x_loc[1] - ins_x_loc[0]
-        hgt = ins_y_loc[1] - ins_y_loc[0]
-        inset = ax.inset_axes([ins_x_loc[0], ins_y_loc[0], wdt, hgt])
-        if ins_x_lim is not None:
-            inset.set_xlim(MyFigure._adjust_lims(ins_x_lim))
-        if ins_y_lim is not None:
-            inset.set_ylim(MyFigure._adjust_lims(ins_y_lim))
-        return inset
+def create_inset(
+    ax: Axes,
+    x_loc: tuple[float],
+    y_loc: tuple[float],
+    x_lim: tuple[float] | None = None,
+    y_lim: tuple[float] | None = None,
+) -> Axes:
+    """
+    Create an inset plot within an existing axis.
+
+    :param ax: The parent axis.
+    :type ax: Axes
+    :param x_loc: X location for the inset.
+    :type x_loc: tuple[float, float]
+    :param y_loc: Y location for the inset.
+    :type y_loc: tuple[float, float]
+    :param x_lim: X limits for the inset.
+    :type x_lim: tuple[float, float] | None
+    :param y_lim: Y limits for the inset.
+    :type y_lim: tuple[float, float] | None
+    :return: The inset axes.
+    :rtype: Axes
+    """
+    wdt = x_loc[1] - x_loc[0]
+    hgt = y_loc[1] - y_loc[0]
+    inset = ax.inset_axes([x_loc[0], y_loc[0], wdt, hgt])
+    if x_lim is not None:
+        inset.set_xlim(_adjust_lims(x_lim))
+    if y_lim is not None:
+        inset.set_ylim(_adjust_lims(y_lim))
+    return inset
+
+
+def _adjust_lims(lims: tuple[float] | None, gap=0.05) -> tuple[float] | None:
+    """
+    Adjust axis limits with a specified gap.
+
+    :param lims: Axis limits to adjust.
+    :type lims: tuple[float, float] | None
+    :param gap: Percentage gap to add to the limits.
+    :type gap: float, optional
+    :return: Adjusted axis limits.
+    :rtype: tuple[float, float] | None
+    """
+    if lims is None:
+        return None
+    else:
+        new_lims = (
+            lims[0] * (1 + gap) - gap * lims[1],
+            lims[1] * (1 + gap) - gap * lims[0],
+        )
+        return new_lims
 
 
 def _add_legend_to_ax(

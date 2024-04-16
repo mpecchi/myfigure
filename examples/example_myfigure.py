@@ -2,7 +2,7 @@
 import pathlib as plib
 import numpy as np
 import pandas as pd
-from myfigure.myfigure import MyFigure, colors, linestyles, markers, hatches, letters
+from myfigure.myfigure import MyFigure, create_inset, colors, linestyles, markers, hatches, letters
 
 a = hatches
 out_path = plib.Path("/Users/matteo/Projects/myfigure/examples/output")
@@ -13,6 +13,7 @@ y1 = np.linspace(15, 5, 10)
 
 f0 = MyFigure(filename="f0", out_path=out_path)
 f0.save_figure()
+
 # %%
 f1 = MyFigure(filename="f1", out_path=out_path)
 f1.axs[0].plot(x0, y0, color=colors[5], linestyle=linestyles[1])
@@ -191,3 +192,12 @@ f12 = MyFigure(
 df_ave.plot(ax=f12.axs[0], kind="bar", yerr=df_std, capsize=2)
 f12.save_figure()
 # %%
+
+# %%
+f13 = MyFigure(filename="f13", out_path=out_path)
+f13.axs[0].plot(x0, y0, color=colors[5], linestyle=linestyles[1])
+f13.axs[0].scatter(x0, y1, color=colors[1], marker=markers[2])
+ins = create_inset(f13.axs[0], x_loc=(0.1, 0.4), y_loc=(0.35, 0.65), x_lim=(5, 7), y_lim=(4, 10))
+ins.plot(x0, y0, color=colors[5], linestyle=linestyles[1])
+ins.scatter(x0, y1, color=colors[1], marker=markers[2])
+f13.save_figure()
