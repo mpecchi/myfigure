@@ -413,7 +413,6 @@ class MyFigure:
             else:
                 axt = None
             if self.broad_props["legend"][i]:
-
                 _add_legend_to_ax(
                     ax,
                     axt,
@@ -486,62 +485,6 @@ class MyFigure:
                     transparent=png_transparency,
                     bbox_inches="tight" if tight_layout else None,
                 )
-
-    # def add_legend(self, masked_values_keep_alpha_1: bool = False) -> None:
-    #     """
-    #     Add a legend to the figure.
-    #     """
-
-    #     if self.kwargs["twinx"] is None:
-
-    #         for i, ax in enumerate(self.axs):
-    #             if self.broad_props["legend"][i]:
-    #                 hnd_ax, lab_ax = ax.get_legend_handles_labels()
-    #                 # if self.broad_props["masked_unsignificant_data"][i]:
-    #                 #     hnd_ax = hnd_ax[: len(hnd_ax) // 2]
-    #                 #     lab_ax = lab_ax[: len(lab_ax) // 2]
-    #                 ax.legend(
-    #                     hnd_ax,
-    #                     lab_ax,
-    #                     loc=self.broad_props["legend_loc"][i],
-    #                     ncol=self.broad_props["legend_ncols"][i],
-    #                     title=self.broad_props["legend_title"][i],
-    #                     bbox_to_anchor=(
-    #                         self.broad_props["legend_bbox_xy"][i]
-    #                         if self.broad_props["legend_bbox_xy"][i] is not None
-    #                         else None
-    #                     ),
-    #                     fontsize=self.kwargs["legend_font_size"],
-    #                     borderpad=self.kwargs["legend_borderpad"],
-    #                     handlelength=self.kwargs["legend_handlelength"],
-    #                 )
-
-    #     else:
-    #         for i, (ax, axt) in enumerate(zip(self.axs, self.axts)):
-    #             if self.broad_props["legend"][i]:
-    #                 hnd_ax, lab_ax = ax.get_legend_handles_labels()
-    #                 # if self.broad_props["masked_unsignificant_data"][i]:
-    #                 #     hnd_ax = hnd_ax[: len(hnd_ax) // 2]
-    #                 #     lab_ax = lab_ax[: len(lab_ax) // 2]
-    #                 hnd_axt, lab_axt = axt.get_legend_handles_labels()
-    #                 ax.legend(
-    #                     hnd_ax + hnd_axt,
-    #                     lab_ax + lab_axt,
-    #                     loc=self.broad_props["legend_loc"][i],
-    #                     ncol=self.broad_props["legend_ncols"][i],
-    #                     title=self.broad_props["legend_title"][i],
-    #                     bbox_to_anchor=(
-    #                         self.broad_props["legend_bbox_xy"][i]
-    #                         if self.broad_props["legend_bbox_xy"][i] is not None
-    #                         else None
-    #                     ),
-    #                     fontsize=self.kwargs["legend_font_size"],
-    #                     borderpad=self.kwargs["legend_borderpad"],
-    #                     handlelength=self.kwargs["legend_handlelength"],
-    #                 )
-    #     if masked_values_keep_alpha_1:
-    #         for handle in ax.legend().legendHandles:
-    #             handle.set_alpha(1)  # Set alpha of each legend handle to fully opaque
 
     def create_inset(
         self,
