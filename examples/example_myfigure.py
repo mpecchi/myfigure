@@ -108,6 +108,21 @@ f7 = MyFigure(
 df_ave.plot(ax=f7.axs[0], kind="bar", yerr=df_std, capsize=2)
 f7.save_figure()
 # %%
+df_ave = pd.DataFrame(data=[[1, 2, 3, 4], [6, 5, 4, 3], [3, 5, 4, 6]], columns=["1", "2", "3", "4"])
+df_std = pd.DataFrame(
+    data=[[0.1, 0.2, 0.3, 0.4], [0.6, 0.65, 0.4, 0.3], [3, 4, 5, 1]], columns=["1", "2", "3", "4"]
+)
+
+f7 = MyFigure(
+    filename="f7",
+    out_path=out_path,
+    annotate_outliers=True,
+    annotate_outliers_decimal_places=1,
+    y_lim=[0, 3],
+)
+df_ave.plot(ax=f7.axs[0], kind="bar", yerr=df_std, capsize=2)
+f7.save_figure()
+# %%
 f8 = MyFigure(
     filename="f8",
     out_path=out_path,
@@ -156,4 +171,23 @@ f11.axs[1].scatter(x0, y0, color=colors[0], marker=markers[0], label="y0")
 f11.axts[1].scatter(x0, y1, color=colors[1], marker=markers[1], label="y1")
 f11.save_figure()
 
+# %%
+# %%
+
+df_ave = pd.DataFrame(data=[[1, 2, 3, 4], [6, 5, 4, 3], [3, 5, 4, 6]], columns=["1", "2", "3", "4"])
+df_std = pd.DataFrame(
+    data=[[1.1, 0.2, 3.3, 0.4], [0.6, 5.65, 0.4, 0.3], [1.3, 4, 5, 7]], columns=["1", "2", "3", "4"]
+)
+
+f12 = MyFigure(
+    filename="f12",
+    out_path=out_path,
+    annotate_outliers=True,
+    annotate_outliers_decimal_places=1,
+    # y_lim=[0, 0.3],
+    mask_insignificant_data=True,
+    mask_insignificant_data_alpha=0.1,
+)
+df_ave.plot(ax=f12.axs[0], kind="bar", yerr=df_std, capsize=2)
+f12.save_figure()
 # %%
