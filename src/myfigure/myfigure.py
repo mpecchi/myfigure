@@ -147,6 +147,8 @@ class MyFigure:
         :type kwargs: Any
         """
 
+        self.axs: list[Axes] | None = None
+        self.axts: list[Axes] | None = None
         self.kwargs = self.default_kwargs()
         self.kwargs.update(kwargs)  # Override defaults with any kwargs provided
         self.process_kwargs()

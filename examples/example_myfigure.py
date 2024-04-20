@@ -26,7 +26,7 @@ f2.axts[0].plot(x0, y1, label="y1", color=colors[1])
 f2.save_figure()
 
 # %%
-f3 = MyFigure(filename="f3", out_path=out_path, rows=2, width=4)
+f3 = MyFigure(filename="f3", out_path=out_path, rows=2, width=4, x_lab=["aaa", "ass"])
 f3.axs[0].plot(x0, y0, color=colors[5], linestyle=linestyles[1], label="1")
 f3.axs[0].scatter(x0, y1, color=colors[1], marker=markers[2], label="2")
 f3.axs[1].plot(x0, y0, color=colors[5], linestyle=linestyles[1], label="1")
@@ -104,7 +104,7 @@ f7 = MyFigure(
     out_path=out_path,
     annotate_outliers=True,
     annotate_outliers_decimal_places=1,
-    y_lim=[0, 3],
+    y_lim=[0, 5.5],
 )
 df_ave.plot(ax=f7.axs[0], kind="bar", yerr=df_std, capsize=2)
 f7.save_figure()
@@ -201,3 +201,5 @@ ins = create_inset(f13.axs[0], x_loc=(0.1, 0.4), y_loc=(0.35, 0.65), x_lim=(5, 7
 ins.plot(x0, y0, color=colors[5], linestyle=linestyles[1])
 ins.scatter(x0, y1, color=colors[1], marker=markers[2])
 f13.save_figure()
+
+# %%
