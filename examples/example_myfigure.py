@@ -20,7 +20,7 @@ f1.axs[0].plot(x0, y0, color=colors[5], linestyle=linestyles[1])
 f1.axs[0].scatter(x0, y1, color=colors[1], marker=markers[2])
 f1.save_figure()
 # %%
-f2 = MyFigure(filename="f2", out_path=out_path, twinx=True, legend_loc="upper center")
+f2 = MyFigure(filename="f2", out_path=out_path, twinx=True, legend_loc="lower center")
 f2.axs[0].plot(x0, y0, label="y0")
 f2.axts[0].plot(x0, y1, label="y1", color=colors[1])
 f2.save_figure()
@@ -102,11 +102,14 @@ df_std = pd.DataFrame(
 f7 = MyFigure(
     filename="f7",
     out_path=out_path,
+    width=4,
+    height=4,
     annotate_outliers=True,
     annotate_outliers_decimal_places=1,
+    # auto_apply_hatches_to_bars=False,
     y_lim=[0, 5.5],
 )
-df_ave.plot(ax=f7.axs[0], kind="bar", yerr=df_std, capsize=2)
+df_ave.plot(ax=f7.axs[0], kind="bar", yerr=df_std, capsize=2, edgecolor="k")
 f7.save_figure()
 # %%
 df_ave = pd.DataFrame(data=[[1, 2, 3, 4], [6, 5, 4, 3], [3, 5, 4, 6]], columns=["1", "2", "3", "4"])
@@ -164,7 +167,12 @@ f10.save_figure()
 
 # %%
 f11 = MyFigure(
-    filename="f11", out_path=out_path, twinx=True, rows=2, width=4, annotate_letters=letters[:2]
+    filename="f11",
+    out_path=out_path,
+    twinx=True,
+    rows=2,
+    width=4,
+    annotate_letters=letters[:2],
 )
 f11.axs[0].plot(x0, y0, color=colors[0], linestyle=linestyles[0], label="y0")
 f11.axts[0].plot(x0, y1, color=colors[1], linestyle=linestyles[1], label="y1")
@@ -202,4 +210,31 @@ ins.plot(x0, y0, color=colors[5], linestyle=linestyles[1])
 ins.scatter(x0, y1, color=colors[1], marker=markers[2])
 f13.save_figure()
 
+
 # %%
+# minimum example of function that uses MyFigure
+def function_using_myfigure(
+    your_other_parameters,
+    **kwargs,
+) -> MyFigure:
+
+    # if you want to specify a different out_path
+    # out_path = your alternative path (using plib)
+    # out_path.mkdir(parents=True, exist_ok=True)
+
+    # example of default parameter that are specific for this function
+    default_kwargs = {
+        "height": 3.2,
+        "width": 3.2,
+        "y_lab": "very_specific_y_lab",
+    }
+    # Update kwargs with the default key-value pairs if the key is not present in kwargs
+    kwargs = {**default_kwargs, **kwargs}
+
+    myfig = MyFigure(
+        rows=1,
+        cols=1,
+        **kwargs,
+    )
+    myfig.save_figure()
+    return myfig
