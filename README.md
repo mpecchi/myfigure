@@ -2,6 +2,10 @@
 
 A class for standardized accessible scientific plots.
 
+[![Documentation Status](https://readthedocs.org/projects/myfigure/badge/?version=latest)](https://myfigure.readthedocs.io/en/latest/?badge=latest)
+
+[![Python CI](https://github.com/mpecchi/myfigure/actions/workflows/continuous_integration.yaml/badge.svg)](https://github.com/mpecchi/myfigure/actions/workflows/continuous_integration.yaml)
+    
 ## Overview
 MyFigure is a Python module tailored for creating and customizing sophisticated visualizations with Matplotlib and Seaborn. It offers an intuitive interface to streamline figure setup, axis configuration, and style management, making it ideal for both simple plots and complex graphical representations in publications and presentations.
 
