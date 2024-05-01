@@ -26,6 +26,10 @@ Install MyFigure using pip:
 pip install myfigure
 ```
 
+## Documentation
+
+Check out the [documentation](https://myfigure.readthedocs.io/).
+
 ## Examples 
 
 Examples are available in the ``examples`` folder.
