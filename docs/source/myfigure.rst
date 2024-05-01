@@ -1,4 +1,4 @@
-tga_data_analysis.myfigure
+myfigure.myfigure
 ================================
 
 .. automodule:: myfigure.myfigure
